@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Triangle.Model
+namespace Triangle.Models
 {
     public class Node
     {

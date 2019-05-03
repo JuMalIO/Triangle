@@ -1,32 +1,43 @@
 ﻿using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using Triangle.Model;
+using Triangle.Interfaces;
+using Triangle.Models;
 
 namespace Triangle.Code
 {
-    public class PyramidV1
+    public class PathFinderWithRecursion : IPathFinder
     {
         private Node _tree;
 
-        public PyramidV1(string file)
+        public PathFinderWithRecursion(List<List<int>> triangle)
         {
-            _tree = ListOfListToTree(ReadFile(file));
+            _tree = TriangleToTree(triangle);
         }
 
-        public List<int> GetMaxPath(bool filterRepeatingOddEvenValues = true)
+        public List<int> GetMaxPath()
         {
             if (_tree == null)
                 return null;
 
-            var tree = _tree;
-            if (filterRepeatingOddEvenValues)
-                tree = FilterRepeatingOddEvenValues(_tree);
+            if (_tree.Children.Count == 0)
+                return new List<int> { _tree.Value };
 
+            var tree = FilterRepeatingOddEvenValues(_tree);
+
+            var paths = GetPaths(new List<int> { tree.Value }, tree.Children);
+
+            var result = GetMaxPath(paths);
+
+            return result;
+        }
+
+        #region Private
+
+        private List<int> GetMaxPath(List<List<int>> paths)
+        {
             List<int> result = null;
 
             var max = int.MinValue;
-            var paths = GetPaths(new List<int> { tree.Value }, tree.Children);
             foreach (var path in paths)
             {
                 var sum = path.Sum();
@@ -40,8 +51,6 @@ namespace Triangle.Code
             return result;
         }
 
-        #region Private
-
         private List<List<int>> GetPaths(List<int> parents, List<Node> children)
         {
             List<List<int>> result = new List<List<int>>();
@@ -52,19 +61,24 @@ namespace Triangle.Code
                 parentClone.Add(child.Value);
 
                 if (child.Children.Count == 0)
-                {
                     result.Add(parentClone);
-                }
                 else
-                {
                     result.AddRange(GetPaths(parentClone, child.Children));
-                }
             }
 
             return result;
         }
 
-        public static Node CloneTree(Node parent)
+        private Node FilterRepeatingOddEvenValues(Node parent)
+        {
+            var tree = CloneTree(parent);
+
+            RemoveRepeatingOddEvenValues(tree);
+
+            return tree;
+        }
+
+        private Node CloneTree(Node parent)
         {
             var result = new Node
             {
@@ -76,16 +90,7 @@ namespace Triangle.Code
             return result;
         }
 
-        private static Node FilterRepeatingOddEvenValues(Node parent)
-        {
-            var tree = CloneTree(parent);
-
-            RemoveRepeatingOddEvenValues(tree);
-
-            return tree;
-        }
-
-        private static void RemoveRepeatingOddEvenValues(Node parent)
+        private void RemoveRepeatingOddEvenValues(Node parent)
         {
             for (var i = parent.Children.Count - 1; i >= 0; i--)
             {
@@ -98,14 +103,14 @@ namespace Triangle.Code
             }
         }
 
-        private static Node ListOfListToTree(List<List<int>> listOfList)
+        private Node TriangleToTree(List<List<int>> triangle)
         {
-            if (listOfList == null || listOfList.Count == 0 || listOfList[0].Count == 0)
+            if (triangle == null || triangle.Count == 0 || triangle[0].Count == 0)
                 return null;
 
             var result = new Node()
             {
-                Value = listOfList[0][0]
+                Value = triangle[0][0]
             };
 
             var parent = new List<Node>
@@ -113,15 +118,15 @@ namespace Triangle.Code
                 result
             };
 
-            for (var i = 1; i < listOfList.Count; i++)
+            for (var i = 1; i < triangle.Count; i++)
             {
                 var children = new List<Node>();
 
-                for (var j = 0; j < listOfList[i].Count; j++)
+                for (var j = 0; j < triangle[i].Count; j++)
                 {
                     var node = new Node
                     {
-                        Value = listOfList[i][j]
+                        Value = triangle[i][j]
                     };
 
                     children.Add(node);
@@ -144,39 +149,6 @@ namespace Triangle.Code
             }
 
             return result;
-        }
-
-        private static List<List<int>> ReadFile(string file)
-        {
-            try
-            {
-                var result = new List<List<int>>();
-
-                using (var reader = new StreamReader(file))
-                {
-                    string line;
-                    while ((line = reader.ReadLine()) != null)
-                    {
-                        result.Add(new List<int>());
-
-                        var numbers = line.Split(' ');
-                        foreach (var number in numbers)
-                        {
-                            int n;
-                            if (int.TryParse(number, out n))
-                            {
-                                result[result.Count - 1].Add(n);
-                            }
-                        }
-                    }
-                }
-
-                return result;
-            }
-            catch
-            {
-                return null;
-            }
         }
 
         #endregion

@@ -2,7 +2,7 @@
 
 namespace Triangle.Tests.Helpers
 {
-    public class CalculatorData
+    public class TriangleData
     {
         public static IEnumerable<object[]> Data =>
             new List<object[]>

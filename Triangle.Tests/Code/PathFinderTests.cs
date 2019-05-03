@@ -8,7 +8,7 @@ namespace Triangle.Tests.Code
     public class PathFinderTests
     {
         [Theory]
-        [MemberData(nameof(System.Data), MemberType = typeof(CalculatorData))]
+        [MemberData(nameof(System.Data), MemberType = typeof(TriangleData))]
         public void GetMaxPath(List<List<int>> value, List<int> expected)
         {
             var pathFinder = new PathFinder(value);

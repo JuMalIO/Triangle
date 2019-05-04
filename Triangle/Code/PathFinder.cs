@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using Triangle.Interfaces;
+using Triangle.Extensions;
 
 namespace Triangle.Code
 {
     public class PathFinder : IPathFinder
     {
-        private List<List<int>> _triangle;
+        private readonly List<List<int>> _triangle;
 
         public PathFinder(List<List<int>> triangle)
         {
@@ -18,45 +18,68 @@ namespace Triangle.Code
         {
             if (_triangle == null || _triangle.Count == 0 || _triangle[0].Count == 0)
                 return null;
-            
-            var topValue = _triangle[0][0];
 
             if (_triangle.Count == 1)
-                return new List<int> { topValue };
+                return new List<int> { _triangle[0][0] };
 
-            var isTopValueEven = topValue % 2 == 0;
-            var isLastValueEven = _triangle.Count % 2 == 0 ? !isTopValueEven : isTopValueEven;
+            var summedTriangle = GetSummedTriangle(_triangle);
 
-            var clonedTriangle = CloneTriangle(_triangle);
-            for (int i = clonedTriangle.Count - 2; i >= 0; i--)
+            var result = GetPathFromOrigianlAndSummedTriangle(_triangle, summedTriangle);
+
+            return result;
+        }
+
+        #region Private
+
+        private List<List<int>> GetSummedTriangle(List<List<int>> triangle)
+        {
+            var isTopValueEven = triangle[0][0].IsEven();
+            var isLastValueEven = triangle.Count.IsEven()
+                ? !isTopValueEven
+                : isTopValueEven;
+
+            var result = triangle.Clone();
+
+            for (int i = result.Count - 2; i >= 0; i--)
             {
                 for (int j = 0; j <= i; j++)
                 {
                     var max = Math.Max(
-                        GetValueIfOddOrEven(clonedTriangle[i + 1][j], isLastValueEven),
-                        GetValueIfOddOrEven(clonedTriangle[i + 1][j + 1], isLastValueEven));
+                        GetValueOrMinIntIfOddOrEven(result[i + 1][j], isLastValueEven),
+                        GetValueOrMinIntIfOddOrEven(result[i + 1][j + 1], isLastValueEven));
 
-                    clonedTriangle[i][j] += max;
+                    result[i][j] += max;
                 }
 
-                if (i % 2 == 0)
+                if (i.IsEven())
                 {
                     isLastValueEven = !isLastValueEven;
                 }
             }
 
+            return result;
+        }
+
+        private List<int> GetPathFromOrigianlAndSummedTriangle(List<List<int>> originalTriangle, List<List<int>> summedTriangle)
+        {
+            var result = new List<int>();
+
             var index = 0;
-            var result = new List<int> { topValue };
-            var value = clonedTriangle[0][0] - topValue;
-            for (int i = 1; i < _triangle.Count; i++)
+
+            var value = summedTriangle[0][0];
+
+            for (int i = 0; i < originalTriangle.Count; i++)
             {
                 for (int j = index; j < index + 2; j++)
                 {
-                    if (clonedTriangle[i][j] == value)
+                    if (summedTriangle[i][j] == value)
                     {
                         index = j;
-                        value = clonedTriangle[i][j] - _triangle[i][j];
-                        result.Add(_triangle[i][j]);
+
+                        value = summedTriangle[i][j] - originalTriangle[i][j];
+
+                        result.Add(originalTriangle[i][j]);
+
                         break;
                     }
                 }
@@ -65,18 +88,11 @@ namespace Triangle.Code
             return result;
         }
 
-        #region Private
-
-        private int GetValueIfOddOrEven(int value, bool isEven)
+        private int GetValueOrMinIntIfOddOrEven(int value, bool isEven)
         {
-            return (value % 2 == 0) == isEven
+            return value.IsEven() == isEven
                 ? value
                 : int.MinValue;
-        }
-
-        private List<List<int>> CloneTriangle(List<List<int>> triangle)
-        {
-            return triangle.Select(x => x.Select(y => y).ToList()).ToList();
         }
 
         #endregion

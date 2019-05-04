@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 
-namespace Triangle.Tests.Helpers
+namespace Triangle.Tests.Code
 {
-    public class TriangleData
+    public class TriangleTestData
     {
         public static IEnumerable<object[]> Data =>
             new List<object[]>

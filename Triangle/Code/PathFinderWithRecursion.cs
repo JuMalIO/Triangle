@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using Triangle.Extensions;
 using Triangle.Interfaces;
 using Triangle.Models;
 
@@ -7,7 +8,7 @@ namespace Triangle.Code
 {
     public class PathFinderWithRecursion : IPathFinder
     {
-        private Node _tree;
+        private readonly Node _tree;
 
         public PathFinderWithRecursion(List<List<int>> triangle)
         {
@@ -57,7 +58,8 @@ namespace Triangle.Code
 
             foreach (var child in children)
             {
-                var parentClone = parents.Select(item => item).ToList();
+                var parentClone = parents.Clone();
+
                 parentClone.Add(child.Value);
 
                 if (child.Children.Count == 0)
@@ -71,23 +73,11 @@ namespace Triangle.Code
 
         private Node FilterRepeatingOddEvenValues(Node parent)
         {
-            var tree = CloneTree(parent);
+            var tree = parent.Clone();
 
             RemoveRepeatingOddEvenValues(tree);
 
             return tree;
-        }
-
-        private Node CloneTree(Node parent)
-        {
-            var result = new Node
-            {
-                Value = parent.Value
-            };
-
-            result.Children = parent.Children.Select(x => CloneTree(x)).ToList();
-
-            return result;
         }
 
         private void RemoveRepeatingOddEvenValues(Node parent)
@@ -96,7 +86,7 @@ namespace Triangle.Code
             {
                 var child = parent.Children[i];
 
-                if (parent.Value % 2 == child.Value % 2)
+                if (parent.Value.IsEven() == child.Value.IsEven())
                     parent.Children.RemoveAt(i);
                 else
                     RemoveRepeatingOddEvenValues(child);

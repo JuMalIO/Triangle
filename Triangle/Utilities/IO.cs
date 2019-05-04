@@ -1,17 +1,19 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using Triangle.Interfaces;
 
 namespace Triangle.Utilities
 {
     public static class IO
     {
-        public static List<List<int>> ReadFile(string file)
+        public static List<List<int>> ReadFile(IFileReader fileReader, string file)
         {
             try
             {
                 var result = new List<List<int>>();
 
-                var lines = File.ReadAllLines(file);
+                var lines = fileReader.ReadAllLines(file);
 
                 foreach (var line in lines)
                 {

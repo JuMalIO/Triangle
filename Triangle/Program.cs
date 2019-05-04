@@ -10,7 +10,7 @@ namespace Triangle
 
         static void Main(string[] args)
         {
-            var triangle = Utilities.IO.ReadFile(File);
+            var triangle = Utilities.IO.ReadFile(new FileReader(), File);
 
             if (triangle != null)
             {

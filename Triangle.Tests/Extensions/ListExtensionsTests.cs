@@ -4,7 +4,7 @@ using Xunit;
 
 namespace Triangle.Tests.Extensions
 {
-    public class ListTests
+    public class ListExtensionsTests
     {
         [Fact]
         public void CloneListOfList()

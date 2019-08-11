@@ -5,7 +5,7 @@ using Xunit;
 
 namespace Triangle.Tests.Extensions
 {
-    public class TreeTests
+    public class TreeExtensionsTests
     {
         [Fact]
         public void CloneNode()

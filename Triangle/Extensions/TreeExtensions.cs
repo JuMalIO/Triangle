@@ -3,7 +3,7 @@ using Triangle.Models;
 
 namespace Triangle.Extensions
 {
-    public static class Tree
+    public static class TreeExtensions
     {
         public static Node Clone(this Node parent)
         {

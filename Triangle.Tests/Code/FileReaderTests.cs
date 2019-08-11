@@ -1,19 +1,19 @@
-﻿using Moq;
+﻿using Microsoft.Extensions.Logging;
+using Moq;
 using System.Collections.Generic;
-using Triangle.Interfaces;
-using Triangle.Utilities;
+using Triangle.Code;
 using Xunit;
 
 namespace Triangle.Tests.Utilities
 {
-    public class IOTests
+    public class FileReaderTests
     {
-        private readonly Mock<IFileReader> fileReader = new Mock<IFileReader>();
+        private readonly Mock<ILogger<FileReader>> _mockLogger = new Mock<ILogger<FileReader>>();
 
         [Fact]
         public void ReadFile()
         {
-            var file = "input.txt";
+            var file = "filename";
 
             var expected = new List<List<int>>
             {
@@ -23,6 +23,8 @@ namespace Triangle.Tests.Utilities
                 new List<int> { 4, 5, 2, 3 }
             };
 
+            var fileReader = new Mock<FileReader>(_mockLogger.Object) { CallBase = true };
+
             fileReader.Setup(x => x.ReadAllLines(It.IsAny<string>())).Returns(new[]
             {
                 "1",
@@ -31,7 +33,7 @@ namespace Triangle.Tests.Utilities
                 "4 5 2 3"
             });
 
-            var result = IO.ReadFile(fileReader.Object, file);
+            var result = fileReader.Object.ReadTriangleFile(file);
 
             fileReader.Verify(x => x.ReadAllLines(It.IsAny<string>()), Times.Once());
 

@@ -3,7 +3,7 @@ using System.Linq;
 
 namespace Triangle.Extensions
 {
-    public static class List
+    public static class ListExtensions
     {
         public static List<List<int>> Clone(this List<List<int>> list)
         {

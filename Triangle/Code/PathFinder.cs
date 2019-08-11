@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Extensions.Logging;
+using System;
 using System.Collections.Generic;
 using Triangle.Interfaces;
 using Triangle.Extensions;
@@ -7,26 +8,39 @@ namespace Triangle.Code
 {
     public class PathFinder : IPathFinder
     {
-        private readonly List<List<int>> _triangle;
+        private readonly ILogger<PathFinder> _logger;
+        private readonly IFileReader _fileReader;
 
-        public PathFinder(List<List<int>> triangle)
+        public PathFinder(ILogger<PathFinder> logger, IFileReader fileReader)
         {
-            _triangle = triangle;
+            _logger = logger;
+            _fileReader = fileReader;
         }
 
-        public List<int> GetMaxPath()
+        public List<int> GetMaxPath(string file)
         {
-            if (_triangle == null || _triangle.Count == 0 || _triangle[0].Count == 0)
+            try
+            {
+                var triangle = _fileReader.ReadTriangleFile(file);
+
+                if (triangle == null)
+                    return null;
+
+                if (triangle.Count == 1)
+                    return new List<int> { triangle[0][0] };
+
+                var summedTriangle = GetSummedTriangle(triangle);
+
+                var result = GetPathFromOrigianlAndSummedTriangle(triangle, summedTriangle);
+
+                return result;
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "Error occurred while counting max triangle path.");
+
                 return null;
-
-            if (_triangle.Count == 1)
-                return new List<int> { _triangle[0][0] };
-
-            var summedTriangle = GetSummedTriangle(_triangle);
-
-            var result = GetPathFromOrigianlAndSummedTriangle(_triangle, summedTriangle);
-
-            return result;
+            }
         }
 
         #region Private

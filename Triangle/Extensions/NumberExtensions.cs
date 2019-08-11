@@ -1,6 +1,6 @@
 ﻿namespace Triangle.Extensions
 {
-    public static class Number
+    public static class NumberExtensions
     {
         public static bool IsEven(this int value)
         {

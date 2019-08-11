@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using Microsoft.Extensions.Logging;
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using Triangle.Extensions;
 using Triangle.Interfaces;
@@ -8,28 +10,43 @@ namespace Triangle.Code
 {
     public class PathFinderWithRecursion : IPathFinder
     {
-        private readonly Node _tree;
+        private readonly ILogger<PathFinderWithRecursion> _logger;
+        private readonly IFileReader _fileReader;
 
-        public PathFinderWithRecursion(List<List<int>> triangle)
+        public PathFinderWithRecursion(ILogger<PathFinderWithRecursion> logger, IFileReader fileReader)
         {
-            _tree = TriangleToTree(triangle);
+            _logger = logger;
+            _fileReader = fileReader;
         }
 
-        public List<int> GetMaxPath()
+        public List<int> GetMaxPath(string file)
         {
-            if (_tree == null)
+            try
+            {
+                var triangle = _fileReader.ReadTriangleFile(file);
+
+                var tree = TriangleToTree(triangle);
+
+                if (tree == null)
+                    return null;
+
+                if (tree.Children.Count == 0)
+                    return new List<int> { tree.Value };
+
+                var filteredTree = FilterRepeatingOddEvenValues(tree);
+
+                var paths = GetPaths(new List<int> { filteredTree.Value }, filteredTree.Children);
+
+                var result = GetMaxPath(paths);
+
+                return result;
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "Error occurred while counting max triangle path.");
+
                 return null;
-
-            if (_tree.Children.Count == 0)
-                return new List<int> { _tree.Value };
-
-            var tree = FilterRepeatingOddEvenValues(_tree);
-
-            var paths = GetPaths(new List<int> { tree.Value }, tree.Children);
-
-            var result = GetMaxPath(paths);
-
-            return result;
+            }
         }
 
         #region Private
@@ -95,7 +112,7 @@ namespace Triangle.Code
 
         private Node TriangleToTree(List<List<int>> triangle)
         {
-            if (triangle == null || triangle.Count == 0 || triangle[0].Count == 0)
+            if (triangle == null)
                 return null;
 
             var result = new Node()

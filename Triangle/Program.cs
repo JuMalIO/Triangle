@@ -1,34 +1,39 @@
-﻿using System;
+﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using System;
+using System.IO;
 using System.Linq;
 using Triangle.Code;
+using Triangle.Extensions;
+using Triangle.Interfaces;
 
 namespace Triangle
 {
     class Program
     {
-        const string File = "Resources/input.txt";
-
         static void Main(string[] args)
         {
-            var triangle = Utilities.IO.ReadFile(new FileReader(), File);
+            var configuration = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("appsettings.json").Build();
 
-            if (triangle != null)
+            var serviceCollection = new ServiceCollection();
+
+            serviceCollection.AddSerilog(configuration);
+            serviceCollection.AddTransient<IFileReader, FileReader>();
+            serviceCollection.AddTransient<IPathFinder, PathFinder>();
+
+            var serviceProvider = serviceCollection.BuildServiceProvider();
+
+            var pathFinder = serviceProvider.GetService<IPathFinder>();
+
+            var file = configuration.GetValue<string>("file");
+
+            var maxPath = pathFinder.GetMaxPath(file);
+            if (maxPath != null)
             {
-                var pathFinder = new PathFinder(triangle);
-                var maxPath = pathFinder.GetMaxPath();
-                if (maxPath != null)
-                {
-                    Console.WriteLine($"Max sum: {maxPath.Sum()}");
-                    Console.WriteLine($"Path: {string.Join(", ", maxPath)}");
-                }
-                else
-                {
-                    Console.WriteLine($"Error occured while getting path from triangle.\n{string.Join("\n", triangle.Select(x => string.Join(" ", x)))}");
-                }
-            }
-            else
-            {
-                Console.WriteLine($"Error occured while reading file \"{File}\".");
+                Console.WriteLine($"Max sum: {maxPath.Sum()}");
+                Console.WriteLine($"Path: {string.Join(", ", maxPath)}");
             }
 
             Console.ReadKey();

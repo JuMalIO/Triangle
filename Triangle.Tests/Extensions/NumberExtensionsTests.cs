@@ -4,7 +4,7 @@ using Xunit;
 
 namespace Triangle.Tests.Extensions
 {
-    public class NumberTests
+    public class NumberExtensionsTests
     {
         [Theory]
         [InlineData(1, false)]

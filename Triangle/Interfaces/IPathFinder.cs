@@ -4,6 +4,6 @@ namespace Triangle.Interfaces
 {
     interface IPathFinder
     {
-        List<int> GetMaxPath();
+        List<int> GetMaxPath(string file);
     }
 }
